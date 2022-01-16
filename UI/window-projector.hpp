@@ -33,6 +33,7 @@ private:
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	void closeEvent(QCloseEvent *event) override;
 
+	bool hideFrame;
 	bool isAlwaysOnTop;
 	bool isAlwaysOnTopOverridden = false;
 	int savedMonitor = -1;
@@ -80,6 +81,7 @@ public:
 
 	bool IsAlwaysOnTop() const;
 	bool IsAlwaysOnTopOverridden() const;
+	void SetHideFrame(bool hideFrame);
 	void SetIsAlwaysOnTop(bool isAlwaysOnTop, bool isOverridden);
 	std::vector<std::pair<int, int>> GetResizeResolutionPresets();
 };
