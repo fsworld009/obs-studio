@@ -34,6 +34,12 @@ OBSProjector::OBSProjector(QWidget *widget, obs_source_t *source_, int monitor,
 	if (isAlwaysOnTop)
 		setWindowFlags(Qt::WindowStaysOnTopHint);
 
+	hideFrame = config_get_bool(GetGlobalConfig(), "BasicWindow",
+				    "HideProjectorFrame");
+
+	if (hideFrame)
+		setWindowFlags(Qt::FramelessWindowHint);
+
 	// Mark the window as a projector so SetDisplayAffinity
 	// can skip it
 	windowHandle()->setProperty("isOBSProjectorWindow", true);
@@ -149,6 +155,28 @@ void OBSProjector::SetHideCursor()
 		setCursor(Qt::BlankCursor);
 	else
 		setCursor(Qt::ArrowCursor);
+}
+
+void OBSProjector::SetHideFrame(bool hideFrame)
+{
+	this->hideFrame = hideFrame;
+
+	// Calculate the current content position.
+	QRect contentBox = geometry();
+
+	if (hideFrame) {
+		// Remove the window frame.
+		setWindowFlags(Qt::FramelessWindowHint);
+	} else {
+		// Restore the window frame.
+		setWindowFlags(windowFlags() & ~Qt::FramelessWindowHint);
+	}
+
+	// Make sure the content box doesn't change.
+	setGeometry(contentBox);
+
+	// Restore the window.
+	showNormal();
 }
 
 void OBSProjector::OBSRenderMultiview(void *data, uint32_t cx, uint32_t cy)
@@ -278,6 +306,16 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 			QMenu *resizeWindowMenu = this->GetWindowResizeMenu();
 			popup.addMenu(resizeWindowMenu);
 		}
+
+		QAction *hideFrameAction =
+			new QAction(QTStr("HideProjectorFrame"), this);
+		hideFrameAction->setCheckable(true);
+		hideFrameAction->setChecked(hideFrame);
+
+		connect(hideFrameAction, &QAction::toggled, this,
+			&OBSProjector::SetHideFrame);
+
+		popup.addAction(hideFrameAction);
 
 		QAction *alwaysOnTopButton = new QAction(
 			QTStr("Basic.MainMenu.View.AlwaysOnTop"), this);
