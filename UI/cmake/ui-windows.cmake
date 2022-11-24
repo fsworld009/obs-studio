@@ -55,5 +55,7 @@ target_sources(
           window-namedialog.hpp
           window-projector.cpp
           window-projector.hpp
+          window-projector-custom-size-dialog.cpp
+          window-projector-custom-size-dialog.hpp
           window-remux.cpp
           window-remux.hpp)

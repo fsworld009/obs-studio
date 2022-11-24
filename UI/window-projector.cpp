@@ -9,6 +9,7 @@
 #include "qt-wrappers.hpp"
 #include "platform.hpp"
 #include "multiview.hpp"
+#include "window-projector-custom-size-dialog.hpp"
 
 static QList<OBSProjector *> multiviewProjectors;
 
@@ -271,6 +272,70 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		} else if (!this->isMaximized()) {
 			popup.addAction(QTStr("ResizeProjectorWindowToContent"),
 					this, &OBSProjector::ResizeToContent);
+
+			// Resize Window menu
+			QMenu *resizeWindowMenu =
+				new QMenu(QTStr("ResizeProjectorWindow"));
+
+			// Resize Window menu: preset resolution items
+			auto resizeToResolutionAction = [this](QAction *action) {
+				int width = action->property("width").toInt();
+				int height = action->property("height").toInt();
+				resize(width, height);
+			};
+
+			int resolutionPresets[][2] = {{1280, 720},
+						      {1920, 1080},
+						      {2560, 1440},
+						      {3840, 2160}};
+			for (size_t i = 0;
+			     i < sizeof(resolutionPresets) / (sizeof(int) * 2);
+			     i++) {
+				QAction *resolution = new QAction(
+					QString("%1 x %2")
+						.arg(resolutionPresets[i][0])
+						.arg(resolutionPresets[i][1]),
+					this);
+				resolution->setProperty(
+					"width", resolutionPresets[i][0]);
+				resolution->setProperty(
+					"height", resolutionPresets[i][1]);
+				connect(resolution, &QAction::triggered,
+					std::bind(resizeToResolutionAction,
+						  resolution));
+				resizeWindowMenu->addAction(resolution);
+			}
+			resizeWindowMenu->addSeparator();
+
+			// Resize Window menu: preset scale items
+			auto resizeToScaleAction = [this](QAction *action) {
+				double scale =
+					action->property("scale").toInt();
+				ResizeToScale(scale);
+			};
+
+			int scalePresets[] = {50, 75, 100, 125, 150, 200};
+
+			for (size_t i = 0;
+			     i < sizeof(scalePresets) / sizeof(int); i++) {
+				QAction *scale = new QAction(
+					QString("%1%").arg(scalePresets[i]),
+					this);
+				scale->setProperty("scale", scalePresets[i]);
+				connect(scale, &QAction::triggered,
+					std::bind(resizeToScaleAction, scale));
+				resizeWindowMenu->addAction(scale);
+			}
+
+			resizeWindowMenu->addSeparator();
+
+			QAction *custom = new QAction(
+				QTStr("ResizeProjectorWindowCustom"), this);
+			connect(custom, &QAction::triggered, this,
+				&OBSProjector::OpenCustomWindowSizeDialog);
+			resizeWindowMenu->addAction(custom);
+
+			popup.addMenu(resizeWindowMenu);
 		}
 
 		QAction *alwaysOnTopButton = new QAction(
@@ -469,6 +534,43 @@ void OBSProjector::ResizeToContent()
 	newX = size.width() - (x * 2);
 	newY = size.height() - (y * 2);
 	resize(newX, newY);
+}
+
+QSize OBSProjector::GetTargetSize()
+{
+	OBSSource source = GetSource();
+	if (source) {
+		return QSize(std::max(obs_source_get_width(source), 1u),
+			     std::max(obs_source_get_height(source), 1u));
+	} else {
+		struct obs_video_info ovi;
+		obs_get_video_info(&ovi);
+		return QSize(ovi.base_width, ovi.base_height);
+	}
+}
+
+void OBSProjector::ResizeToScale(int scale)
+{
+	QSize targetSize = GetTargetSize();
+	double scaleFactor = scale / 100.0;
+	resize(targetSize.width() * scaleFactor,
+	       targetSize.height() * scaleFactor);
+}
+
+void OBSProjector::ResizeToResolution(int width, int height)
+{
+	resize(width, height);
+}
+
+void OBSProjector::OpenCustomWindowSizeDialog()
+{
+	OBSProjectorCustomSizeDialog *dialog =
+		new OBSProjectorCustomSizeDialog(this);
+	connect(dialog, &OBSProjectorCustomSizeDialog::ApplyResolution, this,
+		&OBSProjector::ResizeToResolution);
+	connect(dialog, &OBSProjectorCustomSizeDialog::ApplyScale, this,
+		&OBSProjector::ResizeToScale);
+	dialog->open();
 }
 
 void OBSProjector::AlwaysOnTopToggled(bool isAlwaysOnTop)
