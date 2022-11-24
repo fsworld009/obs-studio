@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QSize>
 #include <obs.hpp>
 #include "qt-display.hpp"
 #include "multiview.hpp"
@@ -46,11 +47,15 @@ private:
 	void SetMonitor(int monitor);
 
 	QScreen *screen = nullptr;
+	QSize GetTargetSize();
 
 private slots:
 	void EscapeTriggered();
 	void OpenFullScreenProjector();
 	void ResizeToContent();
+	void ResizeToScale(int scale);
+	void ResizeToResolution(int width, int height);
+	void OpenCustomWindowSizeDialog();
 	void OpenWindowedProjector();
 	void AlwaysOnTopToggled(bool alwaysOnTop);
 	void ScreenRemoved(QScreen *screen_);
