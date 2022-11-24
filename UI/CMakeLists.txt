@@ -276,6 +276,8 @@ target_sources(
           window-log-reply.cpp
           window-projector.cpp
           window-projector.hpp
+          window-projector-custom-size-dialog.cpp
+          window-projector-custom-size-dialog.hpp
           window-remux.cpp
           window-remux.hpp)
 
