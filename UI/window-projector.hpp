@@ -29,7 +29,10 @@ private:
 	static void OBSSourceDestroyed(void *data, calldata_t *params);
 
 	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
+	void enterEvent(QEnterEvent *) override;
+	void leaveEvent(QEvent *) override;
 	void closeEvent(QCloseEvent *event) override;
 
 	bool hideFrame;
@@ -54,6 +57,8 @@ private:
 	std::pair<int, int> GetScaledSize(int scale);
 	QRect GetScreenSize();
 	std::vector<int> GetResizeScalePresets();
+
+	QPoint onMousePressMouseOffset;
 
 private slots:
 	void EscapeTriggered();
