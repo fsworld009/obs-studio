@@ -27,6 +27,8 @@ private:
 	static void OBSSourceDestroyed(void *data, calldata_t *params);
 
 	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	void closeEvent(QCloseEvent *event) override;
 
@@ -48,6 +50,9 @@ private:
 
 	QScreen *screen = nullptr;
 	QSize GetTargetSize();
+
+	QPoint onMousePressWindowPosition;
+	QPoint onMousePressMouseOffset;
 
 private slots:
 	void EscapeTriggered();

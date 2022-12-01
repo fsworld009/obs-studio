@@ -380,6 +380,9 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		popup.addAction(QTStr("Close"), this, SLOT(EscapeTriggered()));
 		popup.exec(QCursor::pos());
 	} else if (event->button() == Qt::LeftButton) {
+		onMousePressWindowPosition = this->pos();
+		onMousePressMouseOffset = event->pos();
+
 		// Only MultiView projectors handle left click
 		if (this->type != ProjectorType::Multiview)
 			return;
@@ -397,6 +400,24 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		if (main->GetCurrentSceneSource() != src)
 			main->SetCurrentScene(src, false);
 	}
+}
+
+void OBSProjector::mouseMoveEvent(QMouseEvent *event)
+{
+	if (event->buttons() & Qt::LeftButton) {
+		QPoint diff =
+			(this->pos() + event->pos()) -
+			(onMousePressWindowPosition + onMousePressMouseOffset);
+		QPoint newpos = onMousePressWindowPosition + diff;
+
+		setCursor(Qt::SizeAllCursor);
+		this->move(newpos);
+	}
+}
+
+void OBSProjector::mouseReleaseEvent(QMouseEvent *event)
+{
+	setCursor(Qt::ArrowCursor);
 }
 
 void OBSProjector::EscapeTriggered()
