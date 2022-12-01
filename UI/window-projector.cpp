@@ -319,8 +319,10 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		if (this->type != ProjectorType::Multiview)
 			return;
 
-		if (!mouseSwitching)
+		if (!mouseSwitching) {
+			mpos = event->pos();
 			return;
+		}
 
 		QPoint pos = event->pos();
 		OBSSource src =
@@ -332,6 +334,22 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		if (main->GetCurrentSceneSource() != src)
 			main->SetCurrentScene(src, false);
 	}
+}
+
+void OBSProjector::mouseMoveEvent(QMouseEvent *event)
+{
+	if (event->buttons() & Qt::LeftButton) {
+		QPoint diff = event->pos() - mpos;
+		QPoint newpos = this->pos() + diff;
+
+		setCursor(Qt::SizeAllCursor);
+		this->move(newpos);
+	}
+}
+
+void OBSProjector::mouseReleaseEvent(QMouseEvent *event)
+{
+	setCursor(Qt::ArrowCursor);
 }
 
 void OBSProjector::EscapeTriggered()
