@@ -4,6 +4,8 @@
 #include <obs.hpp>
 #include "qt-display.hpp"
 #include "multiview.hpp"
+#include <QMenu>
+#include <vector>
 
 enum class ProjectorType {
 	Source,
@@ -47,6 +49,10 @@ private:
 
 	QScreen *screen = nullptr;
 	QSize GetTargetSize();
+	QMenu *GetWindowResizeMenu();
+	std::pair<int, int> GetScaledSize(int scale);
+	QRect GetScreenSize();
+	std::vector<int> GetResizeScalePresets();
 
 private slots:
 	void EscapeTriggered();
@@ -74,4 +80,5 @@ public:
 	bool IsAlwaysOnTop() const;
 	bool IsAlwaysOnTopOverridden() const;
 	void SetIsAlwaysOnTop(bool isAlwaysOnTop, bool isOverridden);
+	std::vector<std::pair<int, int>> GetResizeResolutionPresets();
 };
