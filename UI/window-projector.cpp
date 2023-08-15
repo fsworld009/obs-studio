@@ -354,7 +354,8 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 
 void OBSProjector::mouseMoveEvent(QMouseEvent *event)
 {
-	if (!isFullScreen() && (event->buttons() & Qt::LeftButton)) {
+	if (!isFullScreen() && hideFrame &&
+	    (event->buttons() & Qt::LeftButton)) {
 		QPoint diff = event->pos() - onMousePressMouseOffset;
 		this->window()->move(this->window()->pos() + diff);
 	}
@@ -362,7 +363,7 @@ void OBSProjector::mouseMoveEvent(QMouseEvent *event)
 
 void OBSProjector::enterEvent(QEnterEvent *)
 {
-	if (!isFullScreen()) {
+	if (!isFullScreen() && hideFrame) {
 		setCursor(Qt::SizeAllCursor);
 	}
 }
@@ -577,10 +578,8 @@ QRect OBSProjector::GetScreenSize()
 
 std::vector<std::pair<int, int>> OBSProjector::GetResizeResolutionPresets()
 {
-	int resolutionPresets[][2] = {{1280, 720},
-				      {1920, 1080},
-				      {2560, 1440},
-				      {3840, 2160}};
+	int resolutionPresets[][2] = {
+		{1280, 720}, {1920, 1080}, {2560, 1440}, {3840, 2160}};
 	std::vector<std::pair<int, int>> availablePresets;
 
 	QRect screenSize = GetScreenSize();
